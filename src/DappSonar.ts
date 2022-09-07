@@ -16,6 +16,6 @@ export class DappSonar extends Web3Provider {
   [key: string]: any;
 
   static Contract(addressOrName: string, contractInterface: ReadonlyArray<Fragment | JsonFragment>, signerOrProvider?: Signer | Provider) {
-    return new Contract(addressOrName, contractInterface, signerOrProvider as Signer)
+    return new Contract(addressOrName, contractInterface, signerOrProvider)
   }
 }

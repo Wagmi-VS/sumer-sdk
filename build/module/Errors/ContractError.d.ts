@@ -3,6 +3,6 @@ export declare class ContractError extends Error {
     name: string;
     address: string;
     args: [];
-    constructor(addressOrName: string, name: string, args: [], address: any);
+    constructor(addressOrName: string, name: string, args: [], address: string);
     toString(): string;
 }

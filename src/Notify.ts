@@ -1,12 +1,11 @@
 export class Notify {
 
-    static error(msg) {
+    static error(msg:any) {
         const log = {
-            msg: msg.toString(),
+            message: msg.toString(),
             timestamp: Date.now(),
-            userAddr: msg.address,
+            wallet: msg.address,
         }
         console.error(log)
-
     }
 }

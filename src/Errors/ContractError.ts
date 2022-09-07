@@ -3,8 +3,8 @@ export class ContractError extends Error {
     name: string
     address: string
     args: []
-    
-    constructor(addressOrName: string, name: string, args: [], address) {
+
+    constructor(addressOrName: string, name: string, args: [], address: string) {
         super();
         this.args = args
         this.name = name
@@ -13,6 +13,6 @@ export class ContractError extends Error {
     }
 
     toString() {
-        return `Error on Contract ${this.addressOrName} function "${this.name}" with args "${this.args.toString()}" `
+        return `Error on Contract ${this.addressOrName} function "${this.name}" with args "${this.args.toString()}"`
     }
 }

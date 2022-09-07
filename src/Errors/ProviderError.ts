@@ -7,6 +7,6 @@ export class ProviderError extends Error {
         this.code = code
     }
     toString() {
-        return `[${this.code}] ${this.msg} `
+        return `[${this.code}] ${this.msg}`
     }
 }
