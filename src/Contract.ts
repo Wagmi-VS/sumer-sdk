@@ -1,12 +1,11 @@
 import { Fragment, JsonFragment } from "@ethersproject/abi";
-import { Provider, } from "@ethersproject/providers";
 import { BaseContract, Signer } from "ethers";
 import { ContractError } from "./Errors/ContractError";
 import { Notify } from "./Notify";
 
 export class Contract {
     baseContract: BaseContract
-    constructor(addressOrName: string, contractInterface: ReadonlyArray<Fragment | JsonFragment>, signerOrProvider?: Signer | Provider) {
+    constructor(addressOrName: string, contractInterface: ReadonlyArray<Fragment | JsonFragment>, signerOrProvider?: Signer) {
         this.baseContract = new BaseContract(addressOrName, contractInterface, signerOrProvider)
         //@ts-ignore
         const functionsNames = contractInterface.map((ci: any) => ci.name);
@@ -19,7 +18,9 @@ export class Contract {
                     response = await this.baseContract[key](...args)
                 } catch (error: any) {
                     if (!error.DappSonar) {
-                        const contracError = new ContractError(addressOrName, key, args)
+
+                        const address = await signerOrProvider.getAddress()
+                        const contracError = new ContractError(addressOrName, key, args, address)
                         Notify.error(contracError)
                         error.DappSonar = true
                     }

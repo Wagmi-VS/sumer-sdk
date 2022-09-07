@@ -1,5 +1,5 @@
 import { Fragment, JsonFragment } from "@ethersproject/abi";
-import { ExternalProvider, JsonRpcFetchFunc, Networkish, Provider, TransactionResponse, Web3Provider } from "@ethersproject/providers";
+import { ExternalProvider, JsonRpcFetchFunc, Networkish, Provider, Web3Provider } from "@ethersproject/providers";
 import { Signer } from "ethers";
 import { Contract } from "./Contract";
 
@@ -16,6 +16,6 @@ export class DappSonar extends Web3Provider {
   [key: string]: any;
 
   static Contract(addressOrName: string, contractInterface: ReadonlyArray<Fragment | JsonFragment>, signerOrProvider?: Signer | Provider) {
-    return new Contract(addressOrName, contractInterface, signerOrProvider)
+    return new Contract(addressOrName, contractInterface, signerOrProvider as Signer)
   }
 }
