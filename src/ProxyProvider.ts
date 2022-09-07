@@ -1,13 +1,16 @@
 import { ExternalProvider, JsonRpcFetchFunc } from "@ethersproject/providers";
+import { ProviderError } from "./Errors/ProviderError";
+import { Notify } from "./Notify";
 
 
-const applyProxy = async (target: any, thisArg: any, argumentsList: any) => {
+export const applyProxy = async (target: any, thisArg: any, argumentsList: any) => {
     try {
         const res = await Reflect.apply(target, thisArg, argumentsList);
         return res
     } catch (error: any) {
         if (!error.DappSonar) {
-            console.error('Provider error', error)
+            const providerError = new ProviderError(error.message, error.code)
+            Notify.error(providerError.toString())
             error.DappSonar = true
         }
         throw error
@@ -28,6 +31,7 @@ export class ProxyProvider {
                     return response
                 }
             },
+            apply: applyProxy
         };
         return new Proxy(_provider, handler)
     }

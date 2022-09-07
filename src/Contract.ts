@@ -1,6 +1,8 @@
 import { Fragment, JsonFragment } from "@ethersproject/abi";
 import { Provider, } from "@ethersproject/providers";
 import { BaseContract, Signer } from "ethers";
+import { ContractError } from "./Errors/ContractError";
+import { Notify } from "./Notify";
 
 export class Contract {
     baseContract: BaseContract
@@ -11,15 +13,14 @@ export class Contract {
 
         functionsNames.forEach((key: any) => {
             this[key] = async (...args: any): Promise<any> => {
-                console.log('Function called ', key, 'args', args)
-                let response
+                let response: any
                 try {
                     //@ts-ignore
                     response = await this.baseContract[key](...args)
-                    console.log('Response', response)
                 } catch (error: any) {
                     if (!error.DappSonar) {
-                        console.error('Error on ', key, ' function', error)
+                        const contracError = new ContractError(addressOrName, key, args)
+                        Notify.error(contracError)
                         error.DappSonar = true
                     }
                     throw error
@@ -30,3 +31,4 @@ export class Contract {
     }
     [key: string]: any;
 }
+
