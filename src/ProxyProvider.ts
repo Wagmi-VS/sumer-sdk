@@ -20,7 +20,7 @@ export const applyProxy = async (target: any, thisArg: any, argumentsList: any) 
 
 export class ProxyProvider {
 
-    constructor(_provider: ExternalProvider | JsonRpcFetchFunc) {
+    constructor(_provider: ExternalProvider | JsonRpcFetchFunc | any) {
 
         const handler = {
             get: function (target: any, prop: any, _receiver: any) {

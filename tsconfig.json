@@ -37,11 +37,17 @@
     ],
     "types": [
       "node",
-      "@types/jest"
+      "@types/jest",
     ],
     "typeRoots": [
       "node_modules/@types",
       "src/types"
+    ],
+    "plugins": [
+      {
+        "transform": "ts-auto-mock/transformer",
+        "cacheBetweenTests": false
+      }
     ]
   },
   "include": [
@@ -50,5 +56,5 @@
   "exclude": [
     "node_modules/**"
   ],
-  "compileOnSave": false
+  "compileOnSave": true
 }

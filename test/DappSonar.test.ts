@@ -1,28 +1,31 @@
-import { MockProvider } from '@rsksmart/mock-web3-provider'
 import { ProxyProvider } from '../src/ProxyProvider'
+import { DappSonar } from '../src/DappSonar'
+import { createMock } from 'ts-auto-mock'
+
+import { JsonRpcFetchFunc } from "@ethersproject/providers";
+
 
 describe('test user acceptance for eth_requestAccounts', () => {
-    const address = '0xB98bD7C7f656290071E52D1aA617D9cB4467Fd6D'
-    const privateKey = 'de926db3012af759b4f24b5a51ef6afa397f04670f634aa4f48d4480417007f3'
     let provider
     beforeEach(async () => {
-        provider = new ProxyProvider(
-            new MockProvider({
-                address, privateKey, networkVersion: 31, debug: false, manualConfirmEnable: true
-            }))
+        const mock = createMock<JsonRpcFetchFunc>(async (a,b)=>{
+            console.log(a,b)
+            return 'a'
+        });
+        mock('a',['asd'])
+        // windows.ethereum
+
+        const proxy = new ProxyProvider(mock)
+        provider = new DappSonar(proxy, 1)
     })
 
 
-    it('rejects with denial', async () => {
-        console.error = jest.fn();
-        
-        const responsePromise = provider.request({ method: 'personal_sign', params: ['asd',address] })
-            .catch((_e:any) => {
-                expect(console.error).toHaveBeenCalledWith('hello')
-            })
-
-        provider.answerEnable(false)
-        await responsePromise
+    it('Proxy provider fail on GET property', async () => {
+        const signer = await provider.getSigner()
+        const signature = await signer.signMessage('patata');
+        console.log(signature)
     })
+
+    it('Proxy provider fail on CALL function', async () => { })
 
 })
