@@ -1,6 +1,7 @@
 import { ProxyProvider } from '../src/ProxyProvider'
 import { DappSonar } from '../src/DappSonar'
 import { ProviderError } from '../src/Errors/ProviderError'
+import { Notify } from '../src/Notify'
 
 const WALLET_ADDRESS = '0xff1ae5bc77d7a3a2dc26bb79e3f743ad2cec8f11'
 describe('test user acceptance for eth_requestAccounts', () => {
@@ -32,7 +33,7 @@ describe('test user acceptance for eth_requestAccounts', () => {
     })
 
     it('DappSonar catch failure sign message', async () => {
-        jest.spyOn(global.console, 'error')
+        jest.spyOn(Notify, 'error')
 
         const mockProvider = {
             request: async (a) => {
@@ -54,13 +55,11 @@ describe('test user acceptance for eth_requestAccounts', () => {
         try {
             await signer.signMessage('message')
         } catch (e) { }
-        expect(console.error).toHaveBeenCalledTimes(1);
+        expect(Notify.error).toHaveBeenCalledTimes(1);
 
-        expect(console.error).toHaveBeenLastCalledWith({
-            message: '[4001] Error from provider',
-            timestamp: expect.any(Number),
-            wallet: WALLET_ADDRESS
-        });
+        const providerError = new ProviderError('Error from provider', 4001, WALLET_ADDRESS)
+
+        expect(Notify.error).toHaveBeenCalledWith(providerError);
 
 
     })
