@@ -135,7 +135,7 @@ describe('Test Dappson catch fails from Provider', () => {
             'approve',
             [walletAddress, false],
             WALLET_ADDRESS,
-            "invalid BigNumber value (argument=\"value\", value=false, code=INVALID_ARGUMENT, version=bignumber/5.7.0)")
+            "invalid BigNumber value")
 
         expect(Notify.error).toHaveBeenCalledWith(
             expect.objectContaining(error)
@@ -157,27 +157,11 @@ describe('Test Dappson catch fails from Provider', () => {
     })
 })
 
-
-const data = [
-    {
-        type: 'equilateral',
-        sides: [1, 1, 1],
-    },
-    {
-        type: 'isosceles',
-        sides: [1, 1, 2],
-    },
-    {
-        type: 'scalene',
-        sides: [1, 2, 3],
-    },
-];
-
-describe.each(data)(`Test Dappson catch fails from RPC`, (triangle) => {
+describe(`Test Dappson catch fails from RPC`, () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
-    it(`whose sides are ${triangle.sides} should be ${triangle.type}`, async () => {
+    it(`Contract revert on call no exist function`, async () => {
         jest.spyOn(Notify, 'error')
 
         const web3Provider = new MockProvider();
@@ -210,7 +194,7 @@ describe.each(data)(`Test Dappson catch fails from RPC`, (triangle) => {
             console.log(name)
         } catch (e) { }
         expect(Notify.error).toHaveBeenCalledTimes(1);
-        const error = new ContractError(contractAddres, 'thisFunctionNoExist', [], wallet, 'testMessage')
+        const error = new ContractError(contractAddres, 'thisFunctionNoExist', [], wallet.address, 'missing revert data in call exception; Transaction reverted without a reason string')
         expect(Notify.error).toHaveBeenCalledWith(
             expect.objectContaining(error)
         );
