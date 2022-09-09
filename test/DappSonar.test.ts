@@ -47,9 +47,11 @@ describe('Test user can use Provider as expected', () => {
 
 describe('Test Dappson catch fails from provider', () => {
     let provider: DappSonar
+   
     afterEach(() => {
         jest.clearAllMocks();
     });
+    
     beforeEach(async () => {
         const mockProvider = {
             request: async (a) => {
@@ -68,8 +70,8 @@ describe('Test Dappson catch fails from provider', () => {
         }
         const proxy = new ProxyProvider(mockProvider)
         provider = new DappSonar(proxy, 1)
-
     })
+   
     it('DappSonar catch failure sign message, user reject', async () => {
         jest.spyOn(Notify, 'error')
 
@@ -86,6 +88,7 @@ describe('Test Dappson catch fails from provider', () => {
 
 
     })
+   
     it('DappSonar catch failure on contract build method', async () => {
 
         jest.spyOn(Notify, 'error')
