@@ -1,7 +1,7 @@
 export class Notify {
 
-    static error(msg: any) {
-        if (process.env.NODE_ENV !== 'test') {
+    static error(msg:any) {
+        if(process.env.NODE_ENV!=='test'){
 
             const log = {
                 message: msg.toString(),

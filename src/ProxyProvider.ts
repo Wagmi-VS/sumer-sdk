@@ -9,7 +9,6 @@ export const applyProxy = async (target: any, thisArg: any, argumentsList: any, 
         return res
     } catch (error: any) {
         if (!error.DappSonar) {
-            console.log(address)
             const providerError = new ProviderError(error.message, error.code, address)
             Notify.error(providerError)
             error.DappSonar = true

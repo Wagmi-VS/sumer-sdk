@@ -2,9 +2,9 @@ export class ContractError extends Error {
     addressOrName: string
     name: string
     address: string
-    args: []
+    args: Array<any>
 
-    constructor(addressOrName: string, name: string, args: [], address: string) {
+    constructor(addressOrName: string, name: string, args: Array<any>, address: string) {
         super();
         this.args = args
         this.name = name
