@@ -1,15 +1,19 @@
-export class ProviderError extends Error {
-    msg: string
-    code: number
-    address: string
+import { BaseError } from "./BaseError";
+import { eipError, findEipError } from "./eip";
 
-    constructor(msg: string, code: number, address) {
-        super(msg);
-        this.msg = msg
-        this.code = code
+export class ProviderError extends BaseError {
+    address: string
+    eip: eipError
+    constructor(message: string, code: number, address: string) {
+        super(message, code);
         this.address = address
+        this.eip = findEipError(code)
+
     }
     toString() {
-        return `[${this.code}] ${this.msg}`
+        if (this.eip) {
+            return `[${this.code}] ${this.eip.description}`
+        }
+        return `[${this.code}] ${this.message}`
     }
 }

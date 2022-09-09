@@ -4,15 +4,10 @@ import { ProviderError } from '../src/Errors/ProviderError'
 import { Notify } from '../src/Notify'
 import { ContractError } from '../src/Errors/ContractError'
 
-const WALLET_ADDRESS = '0xff1ae5bc77d7a3a2dc26bb79e3f743ad2cec8f11'
+const WALLET_ADDRESS = '0xFf1AE5Bc77D7a3a2dc26bb79e3F743Ad2ceC8F11'
 
-//errors:
-const eUserReject = new ProviderError('User rejected the request.', 4001, WALLET_ADDRESS)
-const eTxRejected = new ProviderError('Transaction rejected"', -32003, WALLET_ADDRESS)
-const eNotAuthorized = new ProviderError('The requested account and/or method has not been authorized by the user.',
-    4100, WALLET_ADDRESS)
 
-describe('test user acceptance for eth_requestAccounts', () => {
+describe('Test user can use Provider as expected', () => {
     let provider: DappSonar
     afterEach(() => {
         jest.clearAllMocks();
@@ -25,10 +20,6 @@ describe('test user acceptance for eth_requestAccounts', () => {
                         return [WALLET_ADDRESS]
                     case 'personal_sign':
                         return 'this is a signed message'
-                    case 'eth_sendTransaction':
-                        throw eTxRejected
-                    case 'wallet_switchEthereumChain':
-                            throw eNotAuthorized
                     default:
                         return null
                 }
@@ -40,7 +31,6 @@ describe('test user acceptance for eth_requestAccounts', () => {
         jest.resetAllMocks();
     })
 
-
     it('DappSonar can sign messsage', async () => {
 
         const signer = provider.getSigner()
@@ -48,15 +38,28 @@ describe('test user acceptance for eth_requestAccounts', () => {
         expect(msgSigned).toEqual('this is a signed message')
     })
 
-    it('DappSonar catch failure sign message, user reject', async () => {
-        jest.spyOn(Notify, 'error')
+    it('DappSonar can retrieve actual account', async () => {
+        const address = provider.actualAddres
+        expect(address).toEqual(WALLET_ADDRESS)
+    })
+
+})
+
+describe('Test Dappson catch fails from provider', () => {
+    let provider: DappSonar
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    beforeEach(async () => {
         const mockProvider = {
             request: async (a) => {
                 switch (a.method) {
                     case 'eth_accounts':
                         return [WALLET_ADDRESS]
                     case 'personal_sign':
-                        throw eUserReject
+                        throw { message: 'This is a raw message', code: 4001 }
+                    case 'eth_sendTransaction':
+                        throw { message: 'This is a raw message', code: -32003 }
                     default:
                         return null
                 }
@@ -64,18 +67,26 @@ describe('test user acceptance for eth_requestAccounts', () => {
             selectedAddress: WALLET_ADDRESS
         }
         const proxy = new ProxyProvider(mockProvider)
-
         provider = new DappSonar(proxy, 1)
+
+    })
+    it('DappSonar catch failure sign message, user reject', async () => {
+        jest.spyOn(Notify, 'error')
+
         const signer = provider.getSigner()
         try {
             await signer.signMessage('message')
         } catch (e) { }
         expect(Notify.error).toHaveBeenCalledTimes(1);
-        expect(Notify.error).toHaveBeenCalledWith(eUserReject);
+        const error = new ProviderError(`This is a raw message`, 4001, WALLET_ADDRESS)
+
+        expect(Notify.error).toHaveBeenCalledWith(
+            expect.objectContaining(error)
+        );
 
 
     })
-    it('DappSonar catch failure contract build method', async () => {
+    it('DappSonar catch failure on contract build method', async () => {
 
         jest.spyOn(Notify, 'error')
 
@@ -112,32 +123,31 @@ describe('test user acceptance for eth_requestAccounts', () => {
         try {
             await USDTContract.approve(walletAddress, false);
         } catch (_e) { }
+
         expect(Notify.error).toHaveBeenCalledTimes(1);
 
-        const error = new ContractError(contractAddres, 'approve', [walletAddress, 'false'], WALLET_ADDRESS)
+        const error = new ContractError(contractAddres,
+            'approve',
+            [walletAddress, false],
+            WALLET_ADDRESS,
+            "invalid BigNumber value (argument=\"value\", value=false, code=INVALID_ARGUMENT, version=bignumber/5.7.0)")
 
-        expect(Notify.error).toHaveBeenCalledWith(error);
+        expect(Notify.error).toHaveBeenCalledWith(
+            expect.objectContaining(error)
+        );
     })
 
-    it('DappSonar, cant send tx', async () => {
+    it('DappSonar catch failure on send tx', async () => {
         jest.spyOn(Notify, 'error')
         try {
             await provider.send('eth_sendTransaction', [])
-        } catch (error) {}
+        } catch (error) { }
         expect(Notify.error).toHaveBeenCalledTimes(1);
-        expect(Notify.error).toHaveBeenCalledWith(eTxRejected);
+        const error = new ProviderError(`This is a raw message`, -32003, WALLET_ADDRESS)
+
+        expect(Notify.error).toHaveBeenCalledWith(
+            expect.objectContaining(error)
+        );
 
     })
-
-    it('DappSonar, action not authorized', async () => {
-        jest.spyOn(Notify, 'error')
-        try {
-            await provider.send('wallet_switchEthereumChain', [])
-        } catch (error) {}
-        expect(Notify.error).toHaveBeenCalledTimes(1);
-        expect(Notify.error).toHaveBeenCalledWith(eNotAuthorized);
-
-    })
-
 })
-

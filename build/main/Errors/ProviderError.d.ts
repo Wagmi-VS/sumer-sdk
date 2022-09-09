@@ -1,7 +1,9 @@
+import { eipError } from "./eip";
 export declare class ProviderError extends Error {
-    msg: string;
+    message: string;
     code: number;
     address: string;
-    constructor(msg: string, code: number, address: any);
+    eip: eipError;
+    constructor(message: string, code: number, address: string);
     toString(): string;
 }

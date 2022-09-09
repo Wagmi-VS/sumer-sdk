@@ -1,11 +1,9 @@
 //https://eips.ethereum.org/EIPS/eip-1193
-type eip1193 = {
-    statusCode: number,
-    name: string,
-    description: string,
-}
 
-export const ProviderErrorsEip1193: Array<eip1193> = [
+import { eipError } from ".";
+
+
+export const ProviderErrorsEip1193: Array<eipError> = [
     { statusCode: 4001, name: "User Rejected Request", description: "The user rejected the request." },
     { statusCode: 4100, name: "Unauthorized", description: "The requested method and/ or account has not been authorized by the user." },
     { statusCode: 4200, name: "Unsupported Method", description: "The Provider does not support the requested method." },

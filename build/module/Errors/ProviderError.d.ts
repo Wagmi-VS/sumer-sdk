@@ -1,7 +1,8 @@
-export declare class ProviderError extends Error {
-    msg: string;
-    code: number;
+import { BaseError } from "./BaseError";
+import { eipError } from "./eip";
+export declare class ProviderError extends BaseError {
     address: string;
-    constructor(msg: string, code: number, address: any);
+    eip: eipError;
+    constructor(message: string, code: number, address: string);
     toString(): string;
 }

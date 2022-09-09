@@ -1,7 +1,10 @@
+import { ContractError } from "./Errors/ContractError"
+import { ProviderError } from "./Errors/ProviderError"
+
 export class Notify {
 
-    static error(msg:any) {
-        if(process.env.NODE_ENV!=='test'){
+    static error(msg: ContractError | ProviderError) {
+        if (process.env.NODE_ENV !== 'test') {
 
             const log = {
                 message: msg.toString(),

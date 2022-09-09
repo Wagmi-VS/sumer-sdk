@@ -25,7 +25,7 @@ export class Contract {
                         if (Signer.isSigner(signerOrProvider)) {
                             address = await signerOrProvider.getAddress()
                         }
-                        const contracError = new ContractError(addressOrName, key, args, address)
+                        const contracError = new ContractError(addressOrName, key, args, address, error.message)
                         Notify.error(contracError)
                         error.DappSonar = true
                     }
