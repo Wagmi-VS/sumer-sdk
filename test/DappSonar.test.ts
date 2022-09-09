@@ -3,6 +3,8 @@ import { DappSonar } from '../src/DappSonar'
 import { ProviderError } from '../src/Errors/ProviderError'
 import { Notify } from '../src/Notify'
 import { ContractError } from '../src/Errors/ContractError'
+import { deployContract, MockProvider } from 'ethereum-waffle'
+import ERC20 from "./fixtures/build/ERC20.json";
 
 const WALLET_ADDRESS = '0xFf1AE5Bc77D7a3a2dc26bb79e3F743Ad2ceC8F11'
 
@@ -45,13 +47,13 @@ describe('Test user can use Provider as expected', () => {
 
 })
 
-describe('Test Dappson catch fails from provider', () => {
+describe('Test Dappson catch fails from Provider', () => {
     let provider: DappSonar
-   
+
     afterEach(() => {
         jest.clearAllMocks();
     });
-    
+
     beforeEach(async () => {
         const mockProvider = {
             request: async (a) => {
@@ -71,7 +73,7 @@ describe('Test Dappson catch fails from provider', () => {
         const proxy = new ProxyProvider(mockProvider)
         provider = new DappSonar(proxy, 1)
     })
-   
+
     it('DappSonar catch failure sign message, user reject', async () => {
         jest.spyOn(Notify, 'error')
 
@@ -88,7 +90,7 @@ describe('Test Dappson catch fails from provider', () => {
 
 
     })
-   
+
     it('DappSonar catch failure on contract build method', async () => {
 
         jest.spyOn(Notify, 'error')
@@ -154,3 +156,63 @@ describe('Test Dappson catch fails from provider', () => {
 
     })
 })
+
+
+const data = [
+    {
+        type: 'equilateral',
+        sides: [1, 1, 1],
+    },
+    {
+        type: 'isosceles',
+        sides: [1, 1, 2],
+    },
+    {
+        type: 'scalene',
+        sides: [1, 2, 3],
+    },
+];
+
+describe.each(data)(`Test Dappson catch fails from RPC`, (triangle) => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    it(`whose sides are ${triangle.sides} should be ${triangle.type}`, async () => {
+        jest.spyOn(Notify, 'error')
+
+        const web3Provider = new MockProvider();
+        const provider = new DappSonar(new ProxyProvider(web3Provider.provider))
+        provider.getWallets = web3Provider.getWallets
+        const wallets = provider.getWallets();
+        const wallet = wallets[0]
+        const token = await deployContract(wallet, ERC20, [wallet.address, 1000]);
+        const signer = provider.getSigner()
+        const contractAddres = token.address
+        const noExistAbiFragment = [{
+            inputs: [],
+            name: "thisFunctionNoExist",
+            outputs: [
+                {
+                    "internalType": "uint8",
+                    "name": "",
+                    "type": "uint8"
+                }
+            ],
+            stateMutability: "view",
+            type: "function"
+        }]
+        const TokenContract = DappSonar.Contract(contractAddres, [
+            ...ERC20.abi, ...noExistAbiFragment
+        ], signer)
+        try {
+
+            const name = await TokenContract.thisFunctionNoExist()
+            console.log(name)
+        } catch (e) { }
+        expect(Notify.error).toHaveBeenCalledTimes(1);
+        const error = new ContractError(contractAddres, 'thisFunctionNoExist', [], wallet, 'testMessage')
+        expect(Notify.error).toHaveBeenCalledWith(
+            expect.objectContaining(error)
+        );
+    });
+});
