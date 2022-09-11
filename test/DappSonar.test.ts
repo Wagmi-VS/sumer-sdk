@@ -1,3 +1,4 @@
+
 import { ProxyProvider } from '../src/ProxyProvider'
 import { DappSonar } from '../src/DappSonar'
 import { ProviderError } from '../src/Errors/ProviderError'
@@ -45,13 +46,14 @@ describe('Test user can use Provider as expected', () => {
 
 })
 
-describe('Test Dappson catch fails from provider', () => {
+
+// eip1193
+const eip1193: number[] = [4001, 4100, 4200, 4900, 4901];
+describe.each(eip1193)('Test DappSonar catch fails from provider: eip-1193 errors', (errorCode) => {
     let provider: DappSonar
-   
     afterEach(() => {
         jest.clearAllMocks();
     });
-    
     beforeEach(async () => {
         const mockProvider = {
             request: async (a) => {
@@ -59,9 +61,7 @@ describe('Test Dappson catch fails from provider', () => {
                     case 'eth_accounts':
                         return [WALLET_ADDRESS]
                     case 'personal_sign':
-                        throw { message: 'This is a raw message', code: 4001 }
-                    case 'eth_sendTransaction':
-                        throw { message: 'This is a raw message', code: -32003 }
+                        throw { message: 'This is a raw message', code: errorCode }
                     default:
                         return null
                 }
@@ -71,24 +71,43 @@ describe('Test Dappson catch fails from provider', () => {
         const proxy = new ProxyProvider(mockProvider)
         provider = new DappSonar(proxy, 1)
     })
-   
-    it('DappSonar catch failure sign message, user reject', async () => {
+
+    it(`DappSonar catch failure sign message, error: ${errorCode}`, async () => {
         jest.spyOn(Notify, 'error')
-
-        const signer = provider.getSigner()
         try {
-            await signer.signMessage('message')
-        } catch (e) { }
+            await provider.send('personal_sign', [])
+        } catch (_e) { }
         expect(Notify.error).toHaveBeenCalledTimes(1);
-        const error = new ProviderError(`This is a raw message`, 4001, WALLET_ADDRESS)
-
+        const error = new ProviderError('This is a raw message', errorCode, WALLET_ADDRESS)
         expect(Notify.error).toHaveBeenCalledWith(
             expect.objectContaining(error)
         );
-
-
     })
-   
+})
+
+
+describe('Test DappSonar catch fails from provider, contract interaction', () => {
+    let provider: DappSonar
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    beforeEach(async () => {
+        const mockProvider = {
+            request: async (a) => {
+                switch (a.method) {
+                    case 'eth_accounts':
+                        return [WALLET_ADDRESS]
+                    default:
+                        return null
+                }
+            },
+            selectedAddress: WALLET_ADDRESS
+        }
+        const proxy = new ProxyProvider(mockProvider)
+        provider = new DappSonar(proxy, 1)
+    })
+
+    //contract
     it('DappSonar catch failure on contract build method', async () => {
 
         jest.spyOn(Notify, 'error')
@@ -139,14 +158,42 @@ describe('Test Dappson catch fails from provider', () => {
             expect.objectContaining(error)
         );
     })
+})
 
-    it('DappSonar catch failure on send tx', async () => {
+
+const eip1474: number[] =
+    [-32700, -32600, -32601, -32602, -32603, -32000,
+    -32001, -32002, -32003, -32004, -32005, -32006];
+describe.each(eip1474)('Test DappSonar catch fails from provider, eip-1447 errors', (errorCode) => {
+    let provider: DappSonar
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    beforeEach(async () => {
+        const mockProvider = {
+            request: async (a) => {
+                switch (a.method) {
+                    case 'eth_accounts':
+                        return [WALLET_ADDRESS]
+                    case 'eth_sendTransaction':
+                        throw { message: 'This is a raw message', code: errorCode }
+                    default:
+                        return null
+                }
+            },
+            selectedAddress: WALLET_ADDRESS
+        }
+        const proxy = new ProxyProvider(mockProvider)
+        provider = new DappSonar(proxy, 1)
+    })
+
+    it(`DappSonar catch failure on send tx, error: ${errorCode}`, async () => {
         jest.spyOn(Notify, 'error')
         try {
             await provider.send('eth_sendTransaction', [])
         } catch (error) { }
         expect(Notify.error).toHaveBeenCalledTimes(1);
-        const error = new ProviderError(`This is a raw message`, -32003, WALLET_ADDRESS)
+        const error = new ProviderError(`This is a raw message`, errorCode, WALLET_ADDRESS)
 
         expect(Notify.error).toHaveBeenCalledWith(
             expect.objectContaining(error)
