@@ -5,6 +5,7 @@ import { Notify } from '../src/Notify'
 import { ContractError } from '../src/Errors/ContractError'
 import { deployContract, MockProvider } from 'ethereum-waffle'
 import ERC20 from "./fixtures/build/ERC20.json";
+import { ethers, Wallet } from 'ethers'
 
 const WALLET_ADDRESS = '0xFf1AE5Bc77D7a3a2dc26bb79e3F743Ad2ceC8F11'
 
@@ -158,15 +159,54 @@ describe('Test Dappson catch fails from Provider', () => {
 })
 
 describe(`Test Dappson catch fails from RPC`, () => {
+
+
     afterEach(() => {
         jest.clearAllMocks();
+
     });
-    it(`Contract revert on call no exist function`, async () => {
+
+    it(`Revert on call send transaction`, async () => {
         jest.spyOn(Notify, 'error')
 
         const web3Provider = new MockProvider();
         const provider = new DappSonar(new ProxyProvider(web3Provider.provider))
         provider.getWallets = web3Provider.getWallets
+        
+        const wallets = provider.getWallets();
+        const wallet: Wallet = wallets[0]
+        try {
+            let amountInEther = '10'
+
+            let payload = {
+                to: '0xF02c1c8e6114b1Dbe8937a39260b5b0a374432bB',
+                // Convert currency unit from ether to wei
+                value: ethers.utils.parseEther(amountInEther)
+            }
+
+            // await wallet.sendTransaction(payload)
+
+            const signedTx = await wallet.signTransaction(payload)
+            await provider.sendTransaction(signedTx+'hola');
+           
+        } catch (e) {
+        }
+
+        expect(Notify.error).toHaveBeenCalledTimes(1);
+        const error = new ProviderError(
+            expect.any(String),
+        'INVALID_ARGUMENT', wallet.address)
+
+        expect(Notify.error).toHaveBeenCalledWith(
+            expect.objectContaining(error)
+        );
+    })
+    it(`Contract revert on call no exist function`, async () => {
+        jest.spyOn(Notify, 'error')
+        const web3Provider = new MockProvider();
+        const provider = new DappSonar(new ProxyProvider(web3Provider.provider))
+        provider.getWallets = web3Provider.getWallets
+      
         const wallets = provider.getWallets();
         const wallet = wallets[0]
         const token = await deployContract(wallet, ERC20, [wallet.address, 1000]);

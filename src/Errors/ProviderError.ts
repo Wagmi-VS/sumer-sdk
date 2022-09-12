@@ -4,7 +4,7 @@ import { eipError, findEipError } from "./eip";
 export class ProviderError extends BaseError {
     address: string
     eip: eipError
-    constructor(message: string, code: number, address: string) {
+    constructor(message: string, code: any, address: string) {
         super(message, code);
         this.address = address
         this.eip = findEipError(code)

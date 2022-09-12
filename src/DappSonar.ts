@@ -1,7 +1,9 @@
 import { Fragment, JsonFragment } from "@ethersproject/abi";
-import { ExternalProvider, JsonRpcFetchFunc, Networkish, Provider, Web3Provider } from "@ethersproject/providers";
+import { ExternalProvider, JsonRpcFetchFunc, Networkish, Provider, TransactionResponse, Web3Provider } from "@ethersproject/providers";
 import { Signer } from "ethers";
 import { Contract } from "./Contract";
+import { Notify } from "./Notify";
+import { ProviderError } from "./Errors/ProviderError";
 
 
 export class DappSonar extends Web3Provider {
@@ -18,4 +20,22 @@ export class DappSonar extends Web3Provider {
   static Contract(addressOrName: string, contractInterface: ReadonlyArray<Fragment | JsonFragment>, signerOrProvider?: Signer | Provider) {
     return new Contract(addressOrName, contractInterface, signerOrProvider)
   }
+
+  async sendTransaction(signedTransaction: string | Promise<string>): Promise<TransactionResponse> {
+    try {
+      const response = await super.sendTransaction(signedTransaction)
+
+      return response
+    } catch (error) {
+      if (!error.DappSonar) {
+        const providerError = new ProviderError(error.message, error.code, this.actualAddres)
+        Notify.error(providerError)
+        error.DappSonar = true
+      }
+      throw error
+    }
+  }
+
+ 
+
 }
