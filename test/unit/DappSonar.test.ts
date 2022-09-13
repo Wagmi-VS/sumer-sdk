@@ -1,12 +1,11 @@
-import { ProxyProvider } from '../src/ProxyProvider'
-import { DappSonar } from '../src/DappSonar'
-import { ProviderError } from '../src/Errors/ProviderError'
-import { Notify } from '../src/Notify'
-import { ContractError } from '../src/Errors/ContractError'
+import { ProxyProvider } from '../../src/ProxyProvider'
+import { DappSonar } from '../../src/DappSonar'
+import { ProviderError } from '../../src/Errors/ProviderError'
+import { Notify } from '../../src/Notify'
+import { ContractError } from '../../src/Errors/ContractError'
 import { deployContract, MockProvider } from 'ethereum-waffle'
-import ERC20 from "./fixtures/build/ERC20.json";
+import ERC20 from "../fixtures/build/ERC20.json";
 import { ethers, Wallet } from 'ethers'
-
 const WALLET_ADDRESS = '0xFf1AE5Bc77D7a3a2dc26bb79e3F743Ad2ceC8F11'
 
 
@@ -89,7 +88,6 @@ describe('Test Dappson catch fails from Provider', () => {
             expect.objectContaining(error)
         );
 
-
     })
 
     it('DappSonar catch failure on contract build method', async () => {
@@ -163,7 +161,6 @@ describe(`Test Dappson catch fails from RPC`, () => {
 
     afterEach(() => {
         jest.clearAllMocks();
-
     });
 
     it(`Revert on call send transaction`, async () => {
@@ -172,7 +169,7 @@ describe(`Test Dappson catch fails from RPC`, () => {
         const web3Provider = new MockProvider();
         const provider = new DappSonar(new ProxyProvider(web3Provider.provider))
         provider.getWallets = web3Provider.getWallets
-        
+
         const wallets = provider.getWallets();
         const wallet: Wallet = wallets[0]
         try {
@@ -187,15 +184,15 @@ describe(`Test Dappson catch fails from RPC`, () => {
             // await wallet.sendTransaction(payload)
 
             const signedTx = await wallet.signTransaction(payload)
-            await provider.sendTransaction(signedTx+'hola');
-           
+            await provider.sendTransaction(signedTx + 'hola');
+
         } catch (e) {
         }
 
         expect(Notify.error).toHaveBeenCalledTimes(1);
         const error = new ProviderError(
             expect.any(String),
-        'INVALID_ARGUMENT', wallet.address)
+            'INVALID_ARGUMENT', wallet.address)
 
         expect(Notify.error).toHaveBeenCalledWith(
             expect.objectContaining(error)
@@ -206,7 +203,7 @@ describe(`Test Dappson catch fails from RPC`, () => {
         const web3Provider = new MockProvider();
         const provider = new DappSonar(new ProxyProvider(web3Provider.provider))
         provider.getWallets = web3Provider.getWallets
-      
+
         const wallets = provider.getWallets();
         const wallet = wallets[0]
         const token = await deployContract(wallet, ERC20, [wallet.address, 1000]);

@@ -13,7 +13,8 @@
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
     "dev": "tsc -p tsconfig.module.json -w",
-    "test": "jest",
+    "test:unit": "jest test/unit --config=jest.unit.config.js",
+    "test:e2e": "jest --detectOpenHandles test/e2e --config=jest.e2e.config.js",
     "build:contracts": "npx waffle"
   },
   "repository": {
@@ -28,19 +29,21 @@
   },
   "homepage": "https://github.com/Wagmi-VS/dappsonar#readme",
   "dependencies": {
+    "@chainsafe/dappeteer": "^3.0.0-rc.0",
     "@ethereum-waffle/provider": "^3.4.4",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.0",
     "@types/browserify": "^12.0.37",
     "@types/jest": "^27.4.1",
-    "@types/mocha": "^9.1.1",
     "babel-jest": "^27.1.5",
     "bowser": "^2.11.0",
     "browserify": "^17.0.0",
     "ethers": "^5.7.0",
+    "ganache-core": "^2.13.2",
     "jest": "^27.5.1",
     "jest-ts-auto-mock": "^2.1.0",
     "openzeppelin-solidity": "^4.6.0",
+    "serve-handler": "^6.1.3",
     "start": "^5.1.0",
     "ts-auto-mock": "^3.6.2",
     "ts-jest": "^27.1.3",
@@ -53,8 +56,10 @@
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-node-resolve": "^14.0.0",
     "@rollup/plugin-typescript": "^8.5.0",
+    "@types/mocha": "^9.1.1",
     "eslint": "^8.23.0",
     "ethereum-waffle": "^3.4.4",
+    "mocha": "^10.0.0",
     "rollup": "^2.79.0"
   }
 }
